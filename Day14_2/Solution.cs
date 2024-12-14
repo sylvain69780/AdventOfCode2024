@@ -1,5 +1,6 @@
 ﻿
 using System.ComponentModel.Design;
+using System.Reflection.Metadata.Ecma335;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -34,37 +35,35 @@ internal class Solution
             //            if (q1 == q3 && q2 == q4)
             if (distance < robots.Length * 30)
             {
-                var rob = robots
+                var rob = new Stack<(long y, Stack<long> x)>(robots
                     .GroupBy(r => r.y, r => r.x)
-                    .Select(g => (y: g.Key, x: g.GroupBy(x => x).Select(g => g.Key).OrderBy(x => x).ToArray()))
-                    .OrderBy(g => g.y)
-                    .ToArray();
-                var rowidx = 0;
+                    .Select(g => (y: g.Key, x: new Stack<long>(g.GroupBy(x => x).Select(g => g.Key).OrderByDescending(x => x))))
+                    .OrderByDescending(g => g.y));
+                var robline = rob.Pop();
+                var sb = new StringBuilder();
                 for (var row = 0; row < size.h; row++)
                 {
-                    if (row > rob.Length)
-                        Console.WriteLine(new String('.', size.w));
-                    if (row == rob[rowidx].y)
+                    if (row != robline.y)
                     {
-                        var robline = rob[rowidx++].x;
-                        var sb = new StringBuilder();
-                        var idx = 0;
-                        for (var col = 0; col < size.w; col++)
-                        {
-                            if (idx >= robline.Length)
-                                sb.Append('.');
-                            else if (col == robline[idx])
-                            {
-                                sb.Append('*');
-                                idx++;
-                            }
-                            else
-                                sb.Append('.');
-                        }
-                        Console.WriteLine(sb.ToString());
-                    }
-                    else
                         Console.WriteLine(new String('.', size.w));
+                        continue;
+                    }
+                    var robcol = robline.x.Pop();
+                    sb.Clear();
+                    for (var col = 0; col < size.w; col++)
+                    {
+                        if (col != robcol)
+                        {
+                            sb.Append('.');
+                            continue;
+                        }
+                        sb.Append('*');
+                        if (robline.x.Count > 0)
+                            robcol = robline.x.Pop();
+                    }
+                    Console.WriteLine(sb.ToString());
+                    if (rob.Count > 0)
+                        robline = rob.Pop();
                 }
                 Console.WriteLine();
                 Console.ReadKey();
