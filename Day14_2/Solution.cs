@@ -21,7 +21,6 @@ internal class Solution
     internal long Run()
     {
         var score = 0;
-        var (qx, qy) = (size.w / 2, size.h / 2);
         while (true)
         {
             score++;
@@ -32,23 +31,22 @@ internal class Solution
             }
             var center = (x: robots.Select(r => r.x).Sum() / robots.Length, y: robots.Select(r => r.y).Sum() / robots.Length);
             var distance = robots.Select(r => Math.Abs(r.x - center.x)).Sum() + robots.Select(r => Math.Abs(r.y - center.y)).Sum();
-            //            if (q1 == q3 && q2 == q4)
             if (distance < robots.Length * 30)
             {
-                var rob = new Stack<(long y, Stack<long> x)>(robots
+                var rob = new Stack<(long row, Stack<long> cols)>(robots
                     .GroupBy(r => r.y, r => r.x)
-                    .Select(g => (y: g.Key, x: new Stack<long>(g.GroupBy(x => x).Select(g => g.Key).OrderByDescending(x => x))))
-                    .OrderByDescending(g => g.y));
+                    .Select(g => (row:g.Key,new Stack<long>(g.GroupBy(x => x).Select(g => g.Key).OrderByDescending(x => x))))
+                    .OrderByDescending(g => g.row));
                 var robline = rob.Pop();
                 var sb = new StringBuilder();
                 for (var row = 0; row < size.h; row++)
                 {
-                    if (row != robline.y)
+                    if (row != robline.row)
                     {
                         Console.WriteLine(new String('.', size.w));
                         continue;
                     }
-                    var robcol = robline.x.Pop();
+                    var robcol = robline.cols.Pop();
                     sb.Clear();
                     for (var col = 0; col < size.w; col++)
                     {
@@ -58,16 +56,16 @@ internal class Solution
                             continue;
                         }
                         sb.Append('*');
-                        if (robline.x.Count > 0)
-                            robcol = robline.x.Pop();
+                        if (robline.cols.Count > 0)
+                            robcol = robline.cols.Pop();
                     }
-                    Console.WriteLine(sb.ToString());
                     if (rob.Count > 0)
                         robline = rob.Pop();
+                    Console.WriteLine(sb.ToString());
                 }
                 Console.WriteLine();
                 Console.ReadKey();
-                // break;
+                break;
             }
         }
         return score;
