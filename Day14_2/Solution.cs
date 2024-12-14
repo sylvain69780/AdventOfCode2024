@@ -35,32 +35,32 @@ internal class Solution
             {
                 var rob = new Stack<(long row, Stack<long> cols)>(robots
                     .GroupBy(r => r.y, r => r.x)
-                    .Select(g => (row:g.Key,new Stack<long>(g.GroupBy(x => x).Select(g => g.Key).OrderByDescending(x => x))))
+                    .Select(g => (row: g.Key, new Stack<long>(g.GroupBy(x => x).Select(g => g.Key).OrderByDescending(x => x))))
                     .OrderByDescending(g => g.row));
                 var robline = rob.Pop();
                 for (var row = 0; row < size.h; row++)
                 {
-                    if (row != robline.row)
+                    if (row == robline.row)
                     {
-                        Console.WriteLine(new String('.', size.w));
-                        continue;
-                    }
-                    var robcol = robline.cols.Pop();
-                    var sb = new StringBuilder();
-                    for (var col = 0; col < size.w; col++)
-                    {
-                        if (col != robcol)
+                        var robcol = robline.cols.Pop();
+                        var sb = new StringBuilder();
+                        for (var col = 0; col < size.w; col++)
                         {
-                            sb.Append('.');
-                            continue;
+                            if (col == robcol)
+                            {
+                                sb.Append('*');
+                                if (robline.cols.Count > 0)
+                                    robcol = robline.cols.Pop();
+                            }
+                            else
+                                sb.Append('.');
                         }
-                        sb.Append('*');
-                        if (robline.cols.Count > 0)
-                            robcol = robline.cols.Pop();
+                        if (rob.Count > 0)
+                            robline = rob.Pop();
+                        Console.WriteLine(sb.ToString());
                     }
-                    if (rob.Count > 0)
-                        robline = rob.Pop();
-                    Console.WriteLine(sb.ToString());
+                    else
+                        Console.WriteLine(new String('.', size.w));
                 }
                 Console.WriteLine();
                 Console.ReadKey();
