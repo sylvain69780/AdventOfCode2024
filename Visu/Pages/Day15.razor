@@ -1,0 +1,22 @@
+﻿@page "/day15"
+<canvas id="threeCanvas" style="width: 100%; height: 100%;"></canvas>
+@inject IJSRuntime JSRuntime
+
+@code {
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JSRuntime.InvokeVoidAsync("day15.initializeScene", "threeCanvas");
+        }
+    }
+
+    static double rotation = 0f;
+
+    [JSInvokable]
+    public static double UpdateValueDay15()
+    {
+        rotation += 0.005;
+        return rotation;
+    }
+}
