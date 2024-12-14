@@ -1,4 +1,5 @@
 ﻿
+using System.ComponentModel.Design;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -28,38 +29,46 @@ internal class Solution
                 var (x, y, dx, dy) = robots[r];
                 robots[r] = ((x + dx + size.w) % size.w, (y + dy + size.h) % size.h, dx, dy);
             }
-            var (q1, q2, q3, q4) = (
-                robots.Where(r => r.x < qx && r.y < qy).Count(),
-                robots.Where(r => r.x < qx && r.y > qy).Count(),
-                robots.Where(r => r.x > qx && r.y < qy).Count(),
-                robots.Where(r => r.x > qx && r.y > qy).Count()
-               );
-            var center = (x : robots.Select(r => r.x).Sum() / robots.Length, y: robots.Select(r => r.y).Sum() / robots.Length);
+            var center = (x: robots.Select(r => r.x).Sum() / robots.Length, y: robots.Select(r => r.y).Sum() / robots.Length);
             var distance = robots.Select(r => Math.Abs(r.x - center.x)).Sum() + robots.Select(r => Math.Abs(r.y - center.y)).Sum();
             //            if (q1 == q3 && q2 == q4)
-            if (distance < robots.Length*30)
+            if (distance < robots.Length * 30)
             {
+                var rob = robots
+                    .GroupBy(r => r.y, r => r.x)
+                    .Select(g => (y: g.Key, x: g.GroupBy(x => x).Select(g => g.Key).OrderBy(x => x).ToArray()))
+                    .OrderBy(g => g.y)
+                    .ToArray();
+                var rowidx = 0;
                 for (var row = 0; row < size.h; row++)
                 {
-                    var rob = robots.Where(r => r.y == row).OrderBy(r => r.x).ToArray();
-                    var sb = new StringBuilder();
-                    var idx = 0;
-                    for (var col = 0;col < size.w; col++)
+                    if (row > rob.Length)
+                        Console.WriteLine(new String('.', size.w));
+                    if (row == rob[rowidx].y)
                     {
-                        if ( idx >= rob.Length)
-                            sb.Append('.');
-                        else if ( col == rob[idx].x )
+                        var robline = rob[rowidx++].x;
+                        var sb = new StringBuilder();
+                        var idx = 0;
+                        for (var col = 0; col < size.w; col++)
                         {
-                            sb.Append('*');
-                            idx++;
-                        } else
-                            sb.Append('.');
+                            if (idx >= robline.Length)
+                                sb.Append('.');
+                            else if (col == robline[idx])
+                            {
+                                sb.Append('*');
+                                idx++;
+                            }
+                            else
+                                sb.Append('.');
+                        }
+                        Console.WriteLine(sb.ToString());
                     }
-                    Console.WriteLine(sb.ToString());
+                    else
+                        Console.WriteLine(new String('.', size.w));
                 }
                 Console.WriteLine();
                 Console.ReadKey();
-                break;
+                // break;
             }
         }
         return score;
