@@ -38,7 +38,6 @@ internal class Solution
                     .Select(g => (row:g.Key,new Stack<long>(g.GroupBy(x => x).Select(g => g.Key).OrderByDescending(x => x))))
                     .OrderByDescending(g => g.row));
                 var robline = rob.Pop();
-                var sb = new StringBuilder();
                 for (var row = 0; row < size.h; row++)
                 {
                     if (row != robline.row)
@@ -47,7 +46,7 @@ internal class Solution
                         continue;
                     }
                     var robcol = robline.cols.Pop();
-                    sb.Clear();
+                    var sb = new StringBuilder();
                     for (var col = 0; col < size.w; col++)
                     {
                         if (col != robcol)
