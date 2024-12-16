@@ -32,7 +32,7 @@ internal class Solution
 
     private void Visu((int x, int y) robot)
     {
-        //        return;
+              return;
         Console.WriteLine();
         map[robot.y][robot.x] = '@';
         foreach (var item in map)
@@ -57,48 +57,94 @@ internal class Solution
                 robot = next;
                 continue;
             }
-            if (move == '>')
-                if (Sample(next) == '[')
+            if (move == '>' && Sample(next) == '[')
+            {
+                var stack = new Stack<(int x, int y)>();
+                while (Sample(next) == '[')
                 {
-                    var stack = new Stack<(int x, int y)>();
-                    while (Sample(next) == '[')
-                    {
-                        stack.Push(next);
-                        next = (next.x + 2, next.y);
-                    }
-                    if (Sample(next) == '.')
-                    {
-                        while (stack.Count > 0)
-                        {
-                            map[next.y][next.x] = ']';
-                            map[next.y][next.x - 1] = '[';
-                            next = stack.Pop();
-                        }
-                        map[next.y][next.x] = '.';
-                        robot = next;
-                    }
+                    stack.Push(next);
+                    next = (next.x + 2, next.y);
                 }
-            if (move == '<')
+                if (Sample(next) == '.')
+                {
+                    while (stack.Count > 0)
+                    {
+                        map[next.y][next.x] = ']';
+                        map[next.y][next.x - 1] = '[';
+                        next = stack.Pop();
+                    }
+                    map[next.y][next.x] = '.';
+                    robot = next;
+                }
+            }
+            if (move == '<' && Sample(next) == ']')
+            {
+                var stack = new Stack<(int x, int y)>();
+                while (Sample(next) == ']')
+                {
+                    stack.Push(next);
+                    next = (next.x - 2, next.y);
+                }
+                if (Sample(next) == '.')
+                {
+                    while (stack.Count > 0)
+                    {
+                        map[next.y][next.x] = '[';
+                        map[next.y][next.x + 1] = ']';
+                        next = stack.Pop();
+                    }
+                    map[next.y][next.x] = '.';
+                    robot = next;
+                }
+            }
+            if (move == '^' || move == 'v')
+            {
+                var dir = move == '^' ? -1 : 1;
                 if (Sample(next) == ']')
+                    next = (next.x - 1, next.y);
+                var stack = new Stack<(int x, int y)>();
+                var queue = new Queue<(int x, int y)>();
+                queue.Enqueue(next);
+                var blocked = false;
+                while (queue.Count > 0)
                 {
-                    var stack = new Stack<(int x, int y)>();
-                    while (Sample(next) == ']')
+                    var pos = queue.Dequeue();
+                    if (map[pos.y+dir][pos.x] == '#' || map[pos.y + dir][pos.x + 1] == '#')
                     {
-                        stack.Push(next);
-                        next = (next.x - 2, next.y);
+                        blocked = true;
+                        break;
                     }
-                    if (Sample(next) == '.')
+                    if (map[pos.y + dir][pos.x] == '.' && map[pos.y + dir][pos.x + 1] == '.')
+                        stack.Push(pos);
+                    else
                     {
-                        while (stack.Count > 0)
+                        stack.Push(pos);
+                        if (map[pos.y + dir][pos.x] == '[')
+                            queue.Enqueue((pos.x, pos.y + dir));
+                        else
                         {
-                            map[next.y][next.x] = '[';
-                            map[next.y][next.x + 1] = ']';
-                            next = stack.Pop();
+                            if (map[pos.y + dir][pos.x] == ']')
+                                queue.Enqueue((pos.x - 1, pos.y + dir));
+                            if (map[pos.y + dir][pos.x + 1] == '[')
+                                queue.Enqueue((pos.x + 1, pos.y + dir));
                         }
-                        map[next.y][next.x] = '.';
-                        robot = next;
                     }
+
                 }
+                if (!blocked)
+                {
+                    while (stack.Count > 0)
+                    {
+                        var pos = stack.Pop();
+                        map[pos.y + dir][pos.x] = '[';
+                        map[pos.y + dir][pos.x + 1] = ']';
+                        map[pos.y][pos.x] = '.';
+                        map[pos.y][pos.x + 1] = '.';
+                    }
+                    robot = (robot.x,robot.y + dir);
+                }
+            }
+
         }
         Visu(robot);
         var score = map.SelectMany((row, y) => row.Select((c, x) => (c, x, y)))

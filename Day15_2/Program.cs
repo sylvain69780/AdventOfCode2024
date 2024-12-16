@@ -102,6 +102,16 @@ var test2 = @"########
 
 <^^>>>vv<v>>v<<";
 
-var solution = new Solution(test);
+var test4 = @"#######
+#...#.#
+#.....#
+#..OO@#
+#..O..#
+#.....#
+#######
+
+<vv<<^^<<^^";
+
+var solution = new Solution(test3);
 
 Console.WriteLine(solution.Run());
