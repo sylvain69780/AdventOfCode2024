@@ -43,7 +43,7 @@ internal class Solution
 
     internal long Run()
     {
-        var robot = (x: start.x, y: start.y);
+        var robot = (start.x,start.y);
         for (var counter = 0; counter < moves.Length; counter++)
         {
             Visu(robot);
