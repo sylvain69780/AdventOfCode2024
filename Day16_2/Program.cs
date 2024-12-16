@@ -174,8 +174,7 @@ var test2 = @"#################
 #S#.............#
 #################";
 
-
+// 428
 var solution = new Solution(test3);
 
-// 85396
 Console.WriteLine(solution.Run());
