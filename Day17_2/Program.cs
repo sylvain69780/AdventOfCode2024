@@ -10,7 +10,13 @@ Register C: 0
 
 Program: 0,1,5,4,3,0";
 
-//4,3,7,1,5,3,0,5,4
+var test3 = @"Register A: 2024
+Register B: 0
+Register C: 0
+
+Program: 0,3,5,4,3,0";
+
+//4,3,7,1,5,3,0,5,4   /// 9*3 = 27 bits 
 var solution = new Solution(test2);
 
 Console.WriteLine(solution.Run());
