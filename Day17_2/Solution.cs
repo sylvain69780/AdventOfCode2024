@@ -5,12 +5,16 @@ internal class Solution
 {
     private readonly long[] regs;
     private readonly int[] prog;
+    private readonly string prg;
+
+
     public Solution(string test)
     {
         var parts = test.Replace("\r", string.Empty).Split("\n\n");
         regs = parts[0].Split("\n")
             .Select(x => long.Parse(Regex.Match(x, @"Register .: (\d+)").Groups[1].Value)).ToArray();
         prog = parts[1].Replace("Program: ", string.Empty).Split(",").Select(x => int.Parse(x)).ToArray();
+        prg = string.Join("",prog.Reverse().Select(x => x.ToString()));
     }
 
     void Debug(int pointer, List<int> output)
@@ -61,44 +65,27 @@ internal class Solution
         _ => throw new NotImplementedException()
     };
 
-    internal string Run()
+    IEnumerable<long> Solve(long sum,int power)
     {
-        var soluce = new Stack<int>();
-        soluce.Push(0);
-        while (soluce.Count < prog.Length)
+        for (var i = 0;i<8;i++)
         {
-            var test = ToNumber(soluce.Reverse());
-            var query = Query(test);
-            var value = soluce.Pop();
-            if (query.Count > soluce.Count && query[soluce.Count] == prog[soluce.Count])
-            {
-                soluce.Push(value);
-                Console.WriteLine();
-                Console.WriteLine(string.Join(',', prog.Select(x => x.ToString())));
-                Console.WriteLine(string.Join(',', query.Select(x => x.ToString())));
-                Console.WriteLine(string.Join(',', soluce.Reverse().Select(x => x.ToString())));
-                Console.ReadKey();
-                soluce.Push(0);
-            }
-            else if (value < 7)
-            {
-                value++;
-                soluce.Push(value);
-            }
-            else
-            {
-                if (soluce.Count > 0)
-                {
-                    value = soluce.Pop();
-                    value++;
-                    soluce.Push(value);
-                }
-                else
-                    break;
+            var partialSum = sum + (long)(i*Math.Pow(8, power));
+            var query = Query(partialSum);
+            query.Reverse();
+            var str = string.Join("", query);
+            if (str == prg)
+                yield return partialSum;
+            else if (prg.StartsWith(str.Substring(0, prg.Length-power)))
+             {
+                foreach (var item in Solve(partialSum,power-1))
+                    yield return item;
             }
         }
+    }
 
-        return ToNumber(soluce.Reverse()).ToString();
+    public string Run()
+    {
+        return Solve(0,15).Min().ToString();
     }
 
     internal List<int> Query(long input)
@@ -110,7 +97,7 @@ internal class Solution
         var output = new List<int>();
         while (pointer < prog.Length)
         {
-//                        Debug(pointer,output);
+           // Debug(pointer, output);
             var inst = prog[pointer];
             var op = prog[pointer + 1];
             if (inst == 0) // adv
