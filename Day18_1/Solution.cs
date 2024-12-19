@@ -31,7 +31,7 @@ internal class Solution
         string REVERSE = Console.IsOutputRedirected ? "" : "\x1b[7m";
         string NOREVERSE = Console.IsOutputRedirected ? "" : "\x1b[27m";
 
-        Console.WriteLine();
+        Console.Clear();
         Console.WriteLine();
         foreach (var y in Enumerable.Range(0, size))
             Console.WriteLine(new string(Enumerable.Range(0, size)
@@ -48,16 +48,16 @@ internal class Solution
 
     (int dx, int dy)[] directions = [(1, 0), (0, 1), (-1, 0), (0, -1)];
 
-    char Sample((int x, int y) p, int step, int size)
+    char Sample((int x, int y) p, int step, int size, int take)
     {
         if (p.x < 0 || p.y < 0 || p.x > size - 1 || p.y > size - 1)
             return '#';
-        if (fallingBlocks.Take(step).Contains(p))
+        if (fallingBlocks.Take(take).Contains(p))
             return '#';
         else
             return '.';
     }
-    internal string Run(int size)
+    internal string Run(int size,int take)
     {
 
         var graph = new Dictionary<(int x, int y), int>();
@@ -85,13 +85,13 @@ internal class Solution
             foreach (var (dx, dy) in directions)
             {
                 var np = (p.x + dx, p.y + dy);
-                var tile = Sample(np, step + 1, size);
+                var tile = Sample(np, step + 2, size,take);
                 if (tile == '.')
                 {
                     queue.Enqueue((np, step + 1));
                 }
             }
-            Visu(size, graph,step);
+           //Visu(size, graph,step);
         }
         score = graph.Keys.Where(n => n.x == size - 1 && n.y == size - 1).Select(n => graph[n]).Single();
         return score.ToString();
