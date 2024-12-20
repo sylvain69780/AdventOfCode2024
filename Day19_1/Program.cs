@@ -412,7 +412,7 @@ bwurrg
 brgr
 bbrgwb";
 
-var solution = new Solution(test);
+var solution = new Solution(test2);
 
 Console.WriteLine(solution.Run());
 

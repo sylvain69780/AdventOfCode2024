@@ -1,112 +1,77 @@
-﻿
-
-using System.Diagnostics;
-using System.Text;
-using System.Xml.Serialization;
+﻿using System.Text.RegularExpressions;
 
 internal class Solution
 {
-    private (long x, long y)[] fallingBlocks;
+    private string test;
+    private string[] patterns;
+    private string[] designs;
 
     public Solution(string test)
     {
-        fallingBlocks = test.Replace("\r", string.Empty).Split("\n").Select(x => x.Split(",")).Select(a => (x: long.Parse(a[0]), y: long.Parse(a[1]))).ToArray();
+        var parts = test.Replace("\r", string.Empty).Split("\n\n");
+        patterns = parts[0].Split(", ");
+        designs = parts[1].Split('\n');
     }
 
-    void Visu(int size, Dictionary<(int x, int y), int> graph, int step)
+    internal string Run()
     {
-        string NL = Environment.NewLine; // shortcut
-        string NORMAL = Console.IsOutputRedirected ? "" : "\x1b[39m";
-        string RED = Console.IsOutputRedirected ? "" : "\x1b[91m";
-        string GREEN = Console.IsOutputRedirected ? "" : "\x1b[92m";
-        string YELLOW = Console.IsOutputRedirected ? "" : "\x1b[93m";
-        string BLUE = Console.IsOutputRedirected ? "" : "\x1b[94m";
-        string MAGENTA = Console.IsOutputRedirected ? "" : "\x1b[95m";
-        string CYAN = Console.IsOutputRedirected ? "" : "\x1b[96m";
-        string GREY = Console.IsOutputRedirected ? "" : "\x1b[97m";
-        string BOLD = Console.IsOutputRedirected ? "" : "\x1b[1m";
-        string NOBOLD = Console.IsOutputRedirected ? "" : "\x1b[22m";
-        string UNDERLINE = Console.IsOutputRedirected ? "" : "\x1b[4m";
-        string NOUNDERLINE = Console.IsOutputRedirected ? "" : "\x1b[24m";
-        string REVERSE = Console.IsOutputRedirected ? "" : "\x1b[7m";
-        string NOREVERSE = Console.IsOutputRedirected ? "" : "\x1b[27m";
-
-        Console.Clear();
-        Console.WriteLine();
-        foreach (var y in Enumerable.Range(0, size))
-            Console.WriteLine(new string(Enumerable.Range(0, size)
-                .SelectMany(
-                x =>
-                {
-                    if (fallingBlocks.Take(step).Contains((x, y))) return $"{CYAN}#{NORMAL}";
-                    else if (graph.ContainsKey((x, y))) return "O";
-                    else return ".";
-                }
-                ).ToArray()));
-        // Console.ReadKey();
-    }
-
-    (int dx, int dy)[] directions = [(1, 0), (0, 1), (-1, 0), (0, -1)];
-
-    char Sample((int x, int y) p, int step, int size, int take)
-    {
-        if (p.x < 0 || p.y < 0 || p.x > size - 1 || p.y > size - 1)
-            return '#';
-        if (fallingBlocks.Take(take).Contains(p))
-            return '#';
-        else
-            return '.';
-    }
-    internal string Run(int size,int firstTake)
-    {
-
-        var start = (0, 0);
-        var end = (size - 1, size - 1);
-
-        var take = firstTake;
-        var found = true;
-        while (found)
+        var score = 0L;
+        for (var i = 0; i < designs.Length; i++)
         {
-            take++;
-            found = false;
-            var queue = new Queue<((int x, int y) p, int step)>();
-            queue.Enqueue((start, 0));
-            var graph = new Dictionary<(int x, int y), int>();
-            while (queue.Count > 0)
+            var design = designs[i];
+            score += FindPatterns(design);
+        }
+        return score.ToString();       
+    }
+
+    private long FindPatterns(string design)
+    {
+            var score = 0L;
+            foreach (var item in patterns)
             {
-                var (p, step) = queue.Dequeue();
-                if (graph.TryGetValue((p.x, p.y), out var value))
-                {
-                    if (value > step)
-                        graph[(p.x, p.y)] = step;
-                    else
-                        continue;
+                if (design == item) {
+                    score+=1;
+                    continue;
                 }
-                else
-                    graph.Add((p.x, p.y), step);
-                if (p == end)
+                if (design.StartsWith(item) && design.Length > item.Length)
                 {
-                    found = true;
-                    break;
+                    var remainingDesign = design[item.Length..];
+                    score += FindPatterns(remainingDesign);
                 }
-                foreach (var (dx, dy) in directions)
+            }
+            return score;
+    }
+
+    internal string Run2()
+    {
+        var score = 0L;
+        var cache = new Dictionary<string, long>();
+        for (var i = 0; i < designs.Length; i++)
+        {
+            var design = designs[i];
+            var stack = new Stack<(int index, string guess)>();
+            foreach (var item in patterns)
+                stack.Push((0, item));
+            while (stack.Count > 0)
+            {
+                var (index, guess) = stack.Pop();
+                var remainingDesign = design[index..];
+                if (remainingDesign == guess)
                 {
-                    var np = (p.x + dx, p.y + dy);
-                    var tile = Sample(np, step + 2, size, take);
-                    if (tile == '.')
+                    score++;
+                    cache[remainingDesign] = 1;
+                    continue;
+                }
+                if (remainingDesign.StartsWith(guess))
+                {
+                    foreach (var item in patterns)
                     {
-                        queue.Enqueue((np, step + 1));
+                        stack.Push((index + guess.Length, item));
                     }
                 }
-
             }
-            if (!found)
-            {
-                Visu(size, graph, take);
-            }
+            Console.WriteLine($"{score} {design}");
         }
-        var (x,y) = fallingBlocks[take-1];
-        return $"{x},{y}";
-
+        return score.ToString();
     }
 }
