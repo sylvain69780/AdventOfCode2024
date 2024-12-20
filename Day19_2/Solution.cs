@@ -2,7 +2,6 @@
 
 internal class Solution
 {
-    private string test;
     private string[] patterns;
     private string[] designs;
 
@@ -48,38 +47,5 @@ internal class Solution
 
         cache[design] = score;
         return score;
-    }
-
-    internal string Run2()
-    {
-        var score = 0L;
-        var cache = new Dictionary<string, long>();
-        for (var i = 0; i < designs.Length; i++)
-        {
-            var design = designs[i];
-            var stack = new Stack<(int index, string guess)>();
-            foreach (var item in patterns)
-                stack.Push((0, item));
-            while (stack.Count > 0)
-            {
-                var (index, guess) = stack.Pop();
-                var remainingDesign = design[index..];
-                if (remainingDesign == guess)
-                {
-                    score++;
-                    cache[remainingDesign] = 1;
-                    continue;
-                }
-                if (remainingDesign.StartsWith(guess))
-                {
-                    foreach (var item in patterns)
-                    {
-                        stack.Push((index + guess.Length, item));
-                    }
-                }
-            }
-            Console.WriteLine($"{score} {design}");
-        }
-        return score.ToString();
     }
 }
