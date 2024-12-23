@@ -1,6 +1,7 @@
 
 
 using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 
 internal class Solution
 {
@@ -71,36 +72,41 @@ internal class Solution
         }
     }
 
-    IEnumerable<string> DirKeypadRobotMoves(string code)
-    {
-        var stack = new Stack<(char pos,int level,string result)>();
-        stack.Push(('A',0,string.Empty));
-        while (stack.Count > 0)
-        {
-            var (pos,level,result) = stack.Pop();
-            if (level == code.Length)
-            {
-                yield return result;
-                continue;
-            }
-            var c = code[level];
-                foreach( var move in Moves(pos, c, dirKeypad))
-                    stack.Push((c,level + 1,result + move + 'A'));
-        }
-    }
     internal string Run()
     {
-        var score = 0;
+        var score = 0L;
+        var cache = new Dictionary<(char a, char b,int robots), long>();
         foreach( var code in codes)
         {
-            var moves = KeypadRobotMoves(code)
-                .SelectMany(DirKeypadRobotMoves)
-                .SelectMany(DirKeypadRobotMoves);
-                var best = moves.OrderBy(code => code.Length).First();
-                Console.WriteLine(best);
-                score += best.Length * int.Parse(code[..^1]);
+            var lower = long.MaxValue;
+            var moves = KeypadRobotMoves(code);
+            foreach( var move in moves)
+            { 
+                var pairs = move.Select((c,i) => (a:i == 0 ? 'A' : move[i - 1],b:c)).ToArray();
+                var sum = pairs.Select(p => Cost(p,25,cache) ).Sum();
+                if (sum < lower)
+                    lower = sum;    
+            }
+            score += lower * int.Parse(code[..^1]);
         }
 
         return score.ToString();
+    }
+
+    private long Cost((char a, char b) p, int robots,Dictionary<(char a, char b,int robots), long> cache)
+    {
+        if (cache.TryGetValue((p.a,p.b,robots),out var inCache))
+            return inCache;
+            var lower = long.MaxValue;
+            var moves = Moves(p.a, p.b, dirKeypad);
+            foreach( var move in moves)
+            { 
+                var pairs = move.Append('A').Select((c,i) => (a:i == 0 ? 'A' : move[i - 1],b:c)).ToArray();
+                var sum = pairs.Select(p => robots == 1 ? 1 : Cost(p,robots-1,cache) ).Sum();
+                if (sum < lower)
+                    lower = sum;    
+            }
+            cache.Add((p.a,p.b,robots),lower);
+            return lower;
     }
 }
