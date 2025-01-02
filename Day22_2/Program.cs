@@ -5,7 +5,7 @@
 
 // test = "123";
 
-test = @"6484081
+var test2 = @"6484081
 5518665
 2322188
 13185644
@@ -2426,6 +2426,13 @@ test = @"6484081
 9634690
 15194156";
 
-var solution = new Solution(test);
+test = @"1
+2
+3
+2024";
+
+// test = "123";
+
+var solution = new Solution(test2);
 
 Console.WriteLine(solution.Solve());
