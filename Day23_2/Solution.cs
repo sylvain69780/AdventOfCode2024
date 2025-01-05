@@ -24,19 +24,20 @@ internal class Solution
 
     internal string Solve()
     {
-        var sets = graph.Keys.ToList();
+        var sets = graph.Keys.Select(x => new HashSet<string>() {x}).ToList();
         while (true) 
         {
-            var newSets = new List<string>();
+            var newSets = new List<HashSet<string>>();
             foreach(var set in sets)
             {
-                var newSet = set.Split('-').ToList();
                 // try to add a new element to the set
                 foreach (var node in graph.Keys)
                 {
-                    if (newSet.All(x => graph[x].Contains(node)))
+                    if (set.All(x => graph[x].Contains(node)))
                     {
-                        newSets.Add(set + "-" + node);
+                        set.Add(node);
+                        if ( ! newSets.Any(x => x.SetEquals(set)) )
+                            newSets.Add(set);
                         break;
                     }
                 }
@@ -45,6 +46,6 @@ internal class Solution
                 break;
             sets = newSets;
         }
-        return string.Join(',',sets[0].Split('-').Order());
+        return string.Join(',',sets[0].Order());
     }
 }
