@@ -19,19 +19,40 @@ internal class Solution
 
     internal string Solve()
     {
+        var swap = new Dictionary<string, string>();
+        Encode(0, 3);
+        long result = Compute(swap);
+        return result.ToString();
+    }
+
+    private void Encode(int v1, int v2)
+    {
+        var bits = wires.Count / 2;
+        for (int i = 0; i < bits; i++)
+        {
+            wires[$"x{i:D2}"] = ((v1>>i) & 1) == 1;
+            wires[$"y{i:D2}"] = ((v2 >> i) & 1) == 1;
+        }
+    }
+
+    private long Compute(Dictionary<string, string> swap)
+    {
         var modified = true;
         while (modified)
         {
             modified = false;
             foreach (var gate in gates)
             {
-                if (!wires.ContainsKey(gate.Key) && wires.ContainsKey(gate.Value.op1) && wires.ContainsKey(gate.Value.op2))
+                var output = gate.Key;
+                if (swap.TryGetValue(output, out var output2))
+                    output = output2;
+                if (!wires.ContainsKey(output) && wires.TryGetValue(gate.Value.op1, out var op1) && wires.TryGetValue(gate.Value.op2, out var op2))
                 {
-                    wires.Add(gate.Key, gate.Value.op switch
+                    wires.Add(output, gate.Value.op switch
                     {
-                        "AND" => wires[gate.Value.op1] & wires[gate.Value.op2],
-                        "OR" => wires[gate.Value.op1] | wires[gate.Value.op2],
-                        "XOR" => wires[gate.Value.op1] ^ wires[gate.Value.op2],
+                        "AND" => op1 & op2,
+                        "OR" => op1 | op2,
+                        "XOR" => op1 ^ op2,
                         _ => throw new InvalidExpressionException()
                     });
                     modified = true;
@@ -46,6 +67,7 @@ internal class Solution
                 result += 1L << int.Parse(wire[1..]);
             }
         }
-        return result.ToString();
+
+        return result;
     }
 }
