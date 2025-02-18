@@ -23,29 +23,49 @@ internal class Solution
         while (modified)
         {
             modified = false;
-            foreach (var gate in gates)
+            foreach (var gate in gates.OrderBy(x => x.Value.op ))
             {
                 if (!wires.ContainsKey(gate.Key) && wires.ContainsKey(gate.Value.op1) && wires.ContainsKey(gate.Value.op2))
                 {
-                    wires.Add(gate.Key, gate.Value.op switch
+                    var value = gate.Value.op switch
                     {
                         "AND" => wires[gate.Value.op1] & wires[gate.Value.op2],
                         "OR" => wires[gate.Value.op1] | wires[gate.Value.op2],
                         "XOR" => wires[gate.Value.op1] ^ wires[gate.Value.op2],
                         _ => throw new InvalidExpressionException()
-                    });
+                    };
+                    Console.WriteLine($"{gate.Key} = {gate.Value.op1} {gate.Value.op} {gate.Value.op2}");
+                    wires.Add(gate.Key, value);
                     modified = true;
+                    break;
                 }
             }
         }
-        var result = 0L;
+        var z = 0L;
         foreach (var wire in wires.Keys.Where(x => x[0] == 'z'))
         {
             if (wires[wire])
             {
-                result += 1L << int.Parse(wire[1..]);
+                z += 1L << int.Parse(wire[1..]);
             }
         }
-        return result.ToString();
+        var x = 0L;
+        foreach (var wire in wires.Keys.Where(x => x[0] == 'x'))
+        {
+            if (wires[wire])
+            {
+                x += 1L << int.Parse(wire[1..]);
+            }
+        }
+        var y = 0L;
+        foreach (var wire in wires.Keys.Where(x => x[0] == 'y'))
+        {
+            if (wires[wire])
+            {
+                y += 1L << int.Parse(wire[1..]);
+            }
+        }
+        Console.WriteLine($"x = {x} + y = {y} = z = {z} {x+y == z}");
+        return z.ToString();
     }
 }
