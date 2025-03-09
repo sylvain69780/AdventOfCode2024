@@ -83,7 +83,7 @@ internal class Solution
         {
             var key = $"z{i:D2}";
             var value = GetValue(key);
-//            wires.Add(key,value);
+            wires.Add(key,value);
             Console.WriteLine(new string('-', 30));
         }
 
@@ -113,7 +113,10 @@ internal class Solution
         if (gates.TryGetValue(o2, out var g2) && g2.op1[0] == 'x')
             o2 = o2 + "(" + g2.op + g2.op1[1..]+")";
 
-        Console.WriteLine($"{key} = {o1} {gate.op} {o2}");
+//        Console.WriteLine($"{key} = {o1} {gate.op} {o2}");
+        Console.WriteLine($"{o1} --> {gate.op}{key}");
+        Console.WriteLine($"{o2} --> {gate.op}{key}");
+        Console.WriteLine($"{gate.op}{key} --> {key}");
         value = gate.op switch
         {
             "AND" => op1 & op2,
@@ -121,7 +124,7 @@ internal class Solution
             "XOR" => op1 ^ op2,
             _ => throw new InvalidExpressionException()
         };
-        wires.Add(key, value);
+//        wires.Add(key, value);
         return value;
     }
 
